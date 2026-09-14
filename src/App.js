@@ -41,7 +41,7 @@ function App() {
   }, []);
 
   const playAzaanSound = () => {
-    const audio = new Audio('/azaan.mp3');
+   const audio = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3');
     audio.play();
   };
 
