@@ -40,9 +40,9 @@ function App() {
     document.title = selectedMasjid.name;
   }, []);
 
-  const playAzaanSound = () => {
-   const audio = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3');
-    audio.play();
+ const playAzaanSound = () => {
+    const audio = new Audio('/azaan.mp3');
+    audio.play().catch(e => alert("Audio Play Error: " + e.message));
   };
 
   if (!masjidData) return <div className="loading">Loading...</div>;
