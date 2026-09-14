@@ -28,7 +28,7 @@ const MASJID_DATABASE = {
 function App() {
   const [masjidData, setMasjidData] = useState(null);
 
-  useEffect(() => {
+useEffect(() => {
     // URL parameter se masjid ID detect karna (e.g. app.com/?id=masjid-1)
     const urlParams = new URLSearchParams(window.location.search);
     const masjidId = urlParams.get('id') || 'masjid-1';
@@ -38,6 +38,11 @@ function App() {
 
     // Dynamic Title Update
     document.title = selectedMasjid.name;
+
+    // Notification Permission Request
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
   }, []);
 
  const playAzaanSound = () => {
