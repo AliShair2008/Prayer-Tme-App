@@ -27,7 +27,41 @@ const MASJID_DATABASE = {
 
 function App() {
   const [masjidData, setMasjidData] = useState(null);
+const [deferredPrompt, setDeferredPrompt] = useState(null);
 
+ useEffect(() => {
+    // URL parameter se masjid ID detect karna
+    const urlParams = new URLSearchParams(window.location.search);
+    const masjidId = urlParams.get('id') || 'masjid-1';
+
+    const selectedMasjid = MASJID_DATABASE[masjidId] || MASJID_DATABASE['masjid-1'];
+    setMasjidData(selectedMasjid);
+
+    document.title = selectedMasjid.name;
+
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  useEffect(() => {
+    // Install Prompt Listener
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    });
+  }, []);
+  const handleInstallClick = () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('App Installed');
+        }
+        setDeferredPrompt(null);
+      });
+    }
+  };
 useEffect(() => {
     // URL parameter se masjid ID detect karna (e.g. app.com/?id=masjid-1)
     const urlParams = new URLSearchParams(window.location.search);
@@ -68,10 +102,16 @@ useEffect(() => {
         ))}
       </main>
 
-      <footer className="footer-action">
+    <footer className="footer-action">
         <button className="azaan-btn" onClick={playAzaanSound}>
           🔊 Test Azaan Sound
         </button>
+
+        {deferredPrompt && (
+          <button onClick={handleInstallClick} style={{ marginTop: '10px', backgroundColor: '#10b981', color: '#fff', padding: '10px 20px', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+            📲 Install App
+          </button>
+        )}
       </footer>
     </div>
   );
