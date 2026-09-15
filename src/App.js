@@ -89,6 +89,25 @@ useEffect(() => {
   return (
     <div className="app-container">
       <header className="masjid-header">
+   {deferredPrompt && (
+        <button 
+          onClick={handleInstallClick} 
+          style={{ 
+            width: '100%', 
+            padding: '12px', 
+            backgroundColor: '#10b981', 
+            color: '#fff', 
+            border: 'none', 
+            borderRadius: '8px', 
+            fontWeight: 'bold', 
+            fontSize: '16px',
+            marginBottom: '20px',
+            cursor: 'pointer'
+          }}
+        >
+          📲 Install App
+        </button>
+      )} 
         <h1>{masjidData.name}</h1>
         <p className="subtitle">Namaz Timings (Read-Only)</p>
       </header>
@@ -107,11 +126,6 @@ useEffect(() => {
           🔊 Test Azaan Sound
         </button>
 
-        {deferredPrompt && (
-          <button onClick={handleInstallClick} style={{ marginTop: '10px', backgroundColor: '#10b981', color: '#fff', padding: '10px 20px', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
-            📲 Install App
-          </button>
-        )}
       </footer>
     </div>
   );
