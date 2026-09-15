@@ -78,7 +78,53 @@ useEffect(() => {
       Notification.requestPermission();
     }
   }, []);
+// Service Worker Register
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').then((reg) => {
+        console.log('Service Worker Registered!', reg);
+      });
+    }
+  }, []);
 
+  // Exact Time Check, Notification & Azaan Sound
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date();
+      const currentTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+
+      if (masjidData && masjidData.timings) {
+        Object.entries(masjidData.timings).forEach(([namaz, time]) => {
+          if (time === currentTime) {
+            
+            // 1. Notification Popup
+            if ('serviceWorker' in navigator && Notification.permission === 'granted') {
+              navigator.serviceWorker.ready.then((registration) => {
+                registration.showNotification(`${masjidData.name}`, {
+                  body: `🕌 ${namaz} ka waqt ho gaya hai: ${time}`,
+                  icon: '/logo192.png',
+                  badge: '/logo192.png',
+                  vibrate: [200, 100, 200, 100, 200, 100, 200],
+                  tag: 'prayer-time-alert',
+                  renotify: true
+                });
+              });
+            }
+
+            // 2. Play Audio
+            try {
+              playAzaanSound();
+            } catch (e) {
+              console.log(e);
+            }
+
+          }
+        });
+      }
+    }, 60000); // Check every 60 seconds
+
+    return () => clearInterval(timer);
+  }, [masjidData]);
  const playAzaanSound = () => {
     const audio = new Audio('/azaan.mp3');
     audio.play().catch(e => alert("Audio Play Error: " + e.message));
