@@ -25,6 +25,7 @@ function App() {
   const urlParams = new URLSearchParams(window.location.search);
   const masjidId = urlParams.get('id') || 'masjid-1';
 
+  // 1. Firebase Data Fetching
   useEffect(() => {
     const docRef = doc(db, 'masjids', masjidId);
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
@@ -56,6 +57,52 @@ function App() {
     return () => unsubscribe();
   }, [masjidId]);
 
+  // 2. Azan Alarm Logic
+  useEffect(() => {
+    if (!masjidData || !masjidData.timings) return;
+
+    const timer = setInterval(() => {
+      const now = new Date();
+      let hours = now.getHours();
+      let minutes = now.getMinutes();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      
+      hours = hours % 12;
+      hours = hours ? hours : 12; // 0 baje ko 12 banana
+      minutes = minutes < 10 ? '0' + minutes : minutes;
+      
+      // Exact time format match karna zaroori hai, e.g., "05:15 AM"
+      const strTime = (hours < 10 ? '0' + hours : hours) + ':' + minutes + ' ' + ampm;
+
+      Object.entries(masjidData.timings).forEach(([prayer, time]) => {
+        // Check karega ke time match ho aur current second 0 ho taake 1 baar baje
+        if (time === strTime && now.getSeconds() === 0) {
+          playAzanSound();
+          if (Notification.permission === "granted") {
+            new Notification("Prayer Time!", {
+              body: `${prayer} ka waqt ho gaya hai! (${time})`,
+              icon: "/logo192.png" 
+            });
+          }
+        }
+      });
+    }, 1000); // Har 1 second baad check karega
+
+    return () => clearInterval(timer);
+  }, [masjidData]);
+
+  const playAzanSound = () => {
+    try {
+      const audio = new Audio('/azan.mp3'); 
+      audio.play().catch((err) => {
+        console.log("Browser ne azan block kar di. Screen par ek dafa click karein.", err);
+      });
+    } catch (error) {
+      console.log("Audio error", error);
+    }
+  };
+
+  // 3. Admin & Install App Logic
   useEffect(() => {
     const handlePrompt = (e) => {
       e.preventDefault();
@@ -111,6 +158,13 @@ function App() {
             </li>
           ))}
         </ul>
+      </div>
+
+      {/* Azan Test Button */}
+      <div style={{ textAlign: 'center', margin: '20px' }}>
+         <button onClick={playAzanSound} className="install-btn" style={{ backgroundColor: '#28a745' }}>
+           Test Azan Sound
+         </button>
       </div>
 
       {!isAdmin ? (
